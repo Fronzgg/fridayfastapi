@@ -1,0 +1,14 @@
+{
+  "version": "3.1",
+  "latest_version": "3.1",
+  "title": "FRIDAY Desktop",
+  "summary": "JSON-канал обновлений FRIDAY.",
+  "force_update": false,
+  "installer_url": "",
+  "download_name": "FridaySetup.exe",
+  "published_at": "",
+  "notes": [
+    "Новое облачное окно обновлений.",
+    "Админка редактирует manifest и news JSON."
+  ]
+}
