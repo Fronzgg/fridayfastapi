@@ -6,16 +6,25 @@ from itertools import zip_longest
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 
 APP_VERSION = os.environ.get("FRIDAY_VERSION", "3.1")
 ADMIN_TOKEN = os.environ.get("FRIDAY_ADMIN_TOKEN", "")
+INSTALLER_URL = os.environ.get("FRIDAY_INSTALLER_URL", "https://fridayfastapi.onrender.com/FridaySetup.exe")
 ROOT = Path(__file__).parent
 DATA_DIR = ROOT / "data"
 MANIFEST_FILE = DATA_DIR / "manifest.json"
 NEWS_FILE = DATA_DIR / "news.json"
+INSTALLER_CANDIDATES = [
+    ROOT / "FridaySetup.exe",
+    ROOT / "friday.exe",
+    ROOT / "downloads" / "FridaySetup.exe",
+    ROOT / "downloads" / "friday.exe",
+    ROOT / "release" / "FridaySetup.exe",
+    DATA_DIR / "FridaySetup.exe",
+]
 
 app = FastAPI(title="FRIDAY Cloud", version=APP_VERSION)
 
@@ -59,7 +68,7 @@ def default_manifest():
         "title": "FRIDAY Desktop",
         "summary": "JSON-канал обновлений FRIDAY.",
         "force_update": False,
-        "installer_url": "",
+        "installer_url": INSTALLER_URL,
         "download_name": "FridaySetup.exe",
         "published_at": "",
         "notes": [
@@ -167,6 +176,17 @@ def admin_news(body: JsonBody, token: str = ""):
     require_admin(token)
     data = save_json_body(NEWS_FILE, body.raw)
     return {"ok": True, "news": data, "cloud": payload()}
+
+
+@app.get("/FridaySetup.exe")
+@app.get("/friday.exe")
+@app.get("/download/FridaySetup.exe")
+@app.get("/download/friday.exe")
+def installer_download():
+    for candidate in INSTALLER_CANDIDATES:
+        if candidate.exists() and candidate.is_file():
+            return FileResponse(str(candidate), filename=candidate.name)
+    raise HTTPException(status_code=404, detail="Installer file is not uploaded yet")
 
 
 @app.get("/admin", response_class=HTMLResponse)
