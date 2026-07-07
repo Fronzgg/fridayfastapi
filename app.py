@@ -6,6 +6,7 @@ from itertools import zip_longest
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
@@ -27,6 +28,13 @@ INSTALLER_CANDIDATES = [
 ]
 
 app = FastAPI(title="FRIDAY Cloud", version=APP_VERSION)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class JsonBody(BaseModel):
